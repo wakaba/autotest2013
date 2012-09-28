@@ -19,12 +19,12 @@ use AnyEvent;
 use Path::Class qw(file dir);
 use File::Temp qw(tempdir);
 use Web::UserAgent::Functions qw(http_get http_post);
-use JSON::Functions::XS qw(json_bytes2perl);
+use JSON::Functions::XS qw(json_bytes2perl file2perl);
 
 our @EXPORT = (
     @Test::More::EXPORT, @Test::Differences::EXPORT,
     @Test::X1::EXPORT,
-    qw(file dir tempdir http_get http_post json_bytes2perl),
+    qw(file dir tempdir http_get http_post json_bytes2perl file2perl),
 );
 
 1;
