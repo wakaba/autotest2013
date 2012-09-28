@@ -1,0 +1,6 @@
+AnyEvent
+Exporter::Lite
+Path::Class
+Test::Differences
+Test::More
+Twiggy

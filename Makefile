@@ -1,5 +1,6 @@
 WGET = wget
 PERL = perl
+PROVE = prove
 GIT = git
 PERL_VERSION = 5.16.1
 PERL_ENV = PATH="$(abspath local/perlbrew/perls/perl-$(PERL_VERSION)/bin):$(abspath local/perl-$(PERL_VERSION)/pm/bin):$(PATH)"
@@ -23,5 +24,12 @@ pmbp-update: local/bin/pmbp.pl
 
 pmbp-install: local/bin/pmbp.pl
 	$(PERL_ENV) $(PERL) local/bin/pmbp.pl --install
+
+test: test-deps test-main
+
+test-deps: deps
+
+test-main:
+	$(PERL_ENV) $(PROVE) t/action/*.t
 
 always:
