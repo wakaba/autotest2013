@@ -37,3 +37,6 @@
 [submodule "modules/ooutils"]
 	path = modules/ooutils
 	url = git://github.com/wakaba/perl-ooutils
+[submodule "modules/karasuma-config"]
+	path = modules/karasuma-config
+	url = git://github.com/wakaba/karasuma-config
