@@ -28,6 +28,7 @@ pmbp-install: local/bin/pmbp.pl
 test: test-deps test-main
 
 test-deps: deps
+	cd modules/rdb-utils && $(MAKE) deps
 
 test-main:
 	$(PERL_ENV) $(PROVE) t/action/*.t
