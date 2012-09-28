@@ -17,7 +17,7 @@ sub new_from_env {
     require Karasuma::Config::JSON;
     my $config = Karasuma::Config::JSON->new_from_env;
     require JSON::Functions::XS;
-    my $json_f = file($ENV{MYSQL_DSNS_JSON});
+    my $json_f = file($ENV{MYSQL_DSNS_JSON} || die "|MYSQL_DSNS_JSON| is not set");
     my $json = JSON::Functions::XS::file2perl($json_f);
     return $class->new_from_config_and_dsns($config, $json->{dsns});
 }
@@ -58,7 +58,7 @@ sub cached_repo_set_d {
     return $_[0]->{cached_repo_set_d} ||= do {
         my $d = dir($_[0]->{config}->get_text('autotest.cached_repo_set_dir_name'));
         $d->mkpath;
-        $d;
+        $d->resolve;
     };
 }
 
@@ -129,15 +129,17 @@ sub process_as_cv {
         };
         $schedule_test = $schedule_sleep = sub { };
     };
-    my $signal; $signal = AE::signal 'TERM' => sub {
-        if ($sleeping) {
-            $schedule_end->();
-            undef $signal;
-        } else {
-            $schedule_test = $schedule_sleep = $schedule_end;
-            $sleeping = 1; # for second kill
-        }
-    };
+    for my $sig (qw(TERM INT)) {
+        my $signal; $signal = AE::signal $sig => sub {
+            if ($sleeping) {
+                $schedule_end->();
+                undef $signal;
+            } else {
+                $schedule_test = $schedule_sleep = $schedule_end;
+                $sleeping = 1; # for second kill
+            }
+        };
+    }
 
     $schedule_test->();
 

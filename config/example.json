@@ -1,0 +1,5 @@
+{
+  "autotest.repos.log_post_url": "http://git/repos/logs.json",
+  "autotest.repos.commit_status_post_url": "http://git/repos/statuses/%s.json",
+  "autotest.cached_repo_set_dir_name": "local/git-repos"
+}

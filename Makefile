@@ -33,4 +33,14 @@ test-deps: deps
 test-main:
 	$(PERL_ENV) $(PROVE) t/action/*.t t/runner/*.t
 
+PREPARE_DB_SET_PL = modules/rdb-utils/bin/prepare-db-set.pl
+DB_SET_JSON = local/mysql/dsns.json
+
+testdb-start:
+	$(PERL_ENV) $(PERL) $(PREPARE_DB_SET_PL) --dsn-list $(DB_SET_JSON) \
+	    --create-database autotestjobs
+
+testdb-stop:
+	$(PERL_ENV) $(PERL) $(PREPARE_DB_SET_PL) --dsn-list $(DB_SET_JSON) --stop
+
 always:
