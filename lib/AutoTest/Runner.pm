@@ -12,6 +12,16 @@ sub new_from_config_and_dsns {
     return bless {config => $_[1], dsns => $_[2]}, $_[0];
 }
 
+sub new_from_env {
+    my $class = shift;
+    require Karasuma::Config::JSON;
+    my $config = Karasuma::Config::JSON->new_from_env;
+    require JSON::Functions::XS;
+    my $json_f = file($ENV{MYSQL_DSNS_JSON});
+    my $json = JSON::Functions::XS::file2perl($json_f);
+    return $class->new_from_config_and_dsns($config, $json->{dsns});
+}
+
 sub config {
     return $_[0]->{config};
 }

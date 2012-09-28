@@ -63,6 +63,32 @@ test {
 test {
     my $c = shift;
     my $cached_d = dir(tempdir(CLEANUP => 1));
+    print { $cached_d->file('config.json')->openw } JSON::Functions::XS::perl2json_bytes {
+        'autotest.repos.log_post_url' => 'hoge',
+        'autotest.repos.commit_status_post_url' => 'fuga',
+        'autotest.cached_repo_set_dir_name' => $cached_d->absolute->stringify,
+    };
+    local $ENV{KARASUMA_CONFIG_JSON} = $cached_d->file('config.json');
+    local $ENV{KARASUMA_CONFIG_FILE_DIR_NAME} = $cached_d->subdir('keys');
+    local $ENV{MYSQL_DSNS_JSON} = $c->received_data->json_f;
+    my $runner = AutoTest::Runner->new_from_env;
+    my $timer; $timer = AE::timer 1, 0, sub {
+        kill 'TERM', $$;
+        undef $timer;
+    };
+    $runner->process_as_cv->cb(sub {
+        test {
+            is $runner->log_post_url, 'hoge';
+            is $runner->commit_status_post_url, 'fuga';
+            done $c;
+            undef $c;
+        } $c;
+    });
+} name => 'env', n => 2, wait => $mysqld_cv;
+
+test {
+    my $c = shift;
+    my $cached_d = dir(tempdir(CLEANUP => 1));
     my $config = Karasuma::Config::JSON->new_from_config_data({
         'autotest.repos.log_post_url' => "http://$server_host/repos/logs",
         'autotest.repos.commit_status_post_url' => "http://$server_host/repos/statuses/%s.json",
