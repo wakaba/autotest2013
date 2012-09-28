@@ -1,0 +1,9 @@
+[submodule "modules/dongry"]
+	path = modules/dongry
+	url = git://github.com/wakaba/dongry
+[submodule "modules/rdb-utils"]
+	path = modules/rdb-utils
+	url = git://github.com/wakaba/perl-rdb-utils
+[submodule "modules/vcutils"]
+	path = modules/vcutils
+	url = git://github.com/wakaba/perl-vcutils
