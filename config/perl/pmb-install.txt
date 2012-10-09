@@ -100,6 +100,8 @@ Unicode::Stringprep~1.104
 AnyEvent::HTTP~2.14
 IO::Socket::Socks~0.62
 AnyEvent::HTTP::Socks~0.04
+IO::HTML~0.04
+HTTP::Response~6.04
 Net::SSLeay~1.49
 IO::Socket::SSL~1.76
 Mozilla::CA~20120823
