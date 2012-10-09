@@ -9,7 +9,7 @@ use AnyEvent::Git::Repository;
 use AutoTest::Action::RunTest;
 use AutoTest::Action::ProcessJob;
 use Wanage::HTTP;
-use Warabe::App;
+use AutoTest::Warabe::App;
 
 sub new_from_config_and_dsns {
     return bless {config => $_[1], dsns => $_[2]}, $_[0];
@@ -127,7 +127,7 @@ sub process_as_cv {
         my ($httpd, $req) = @_;
         my $http = Wanage::HTTP->new_from_anyeventhttpd_httpd_and_req($httpd, $req);
         $self->log($http->client_ip_addr->as_text . ': ' . $http->request_method . ' ' . $http->url->stringify);
-        my $app = Warabe::App->new_from_http($http);
+        my $app = AutoTest::Warabe::App->new_from_http($http);
         $http->send_response(onready => sub {
             $app->execute (sub {
                 $self->process_http($app);
@@ -180,6 +180,38 @@ sub process_as_cv {
 sub process_http {
     my ($self, $app) = @_;
     my $path = $app->path_segments;
+
+    if ($path->[0] eq 'jobs' and not defined $path->[1]) {
+        # /jobs
+        $app->requires_request_method({POST => 1});
+
+        my $json = $app->request_json;
+
+        my $branch = ref $json eq 'HASH' ? $json->{ref} || '' : '';
+        $branch =~ s{^refs/heads/}{};
+        $app->throw_error(400, reason_phrase => 'bad ref') unless $branch;
+
+        my $url = ref $json->{repository} eq 'HASH' ? $json->{repository}->{url} : undef
+            or $app->throw_error(400, reason_phrase => 'bad repository.url');
+        my $rev = $json->{after}
+            or $app->throw_error(400, reason_phrase => 'bad after');
+
+        $app->http->set_response_header('Content-Type' => 'text/plain; charset=utf-8');
+        $app->http->send_response_body_as_text("Inserting a job... ");
+
+        require AutoTest::Action::InsertJob;
+        my $action = AutoTest::Action::InsertJob->new_from_dbreg($self->dbreg);
+        $action->create_table;
+        $action->insert(
+            url => $url,
+            branch => $branch,
+            sha => $rev,
+        );
+
+        $app->http->send_response_body_as_text("done");
+        $app->http->close_response_body;
+        return $app->throw;
+    }
     
     return $app->throw_error(404);
 }

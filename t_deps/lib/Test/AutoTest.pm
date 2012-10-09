@@ -18,13 +18,16 @@ use Test::X1;
 use AnyEvent;
 use Path::Class qw(file dir);
 use File::Temp qw(tempdir);
-use Web::UserAgent::Functions qw(http_get http_post);
-use JSON::Functions::XS qw(json_bytes2perl file2perl);
+use Web::UserAgent::Functions qw(http_get http_post http_post_data);
+use JSON::Functions::XS qw(json_bytes2perl file2perl perl2json_bytes);
 
 our @EXPORT = (
     @Test::More::EXPORT, @Test::Differences::EXPORT,
     @Test::X1::EXPORT,
-    qw(file dir tempdir http_get http_post json_bytes2perl file2perl),
+    qw(
+        file dir tempdir http_get http_post http_post_data
+        json_bytes2perl file2perl perl2json_bytes
+    ),
 );
 
 1;
