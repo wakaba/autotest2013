@@ -1,5 +1,7 @@
 {
-  "autotest.repos.log_post_url": "http://git/repos/logs.json",
-  "autotest.repos.commit_status_post_url": "http://git/repos/statuses/%s.json",
-  "autotest.cached_repo_set_dir_name": "local/git-repos"
+  "autotest.repos.log_post_url": "http://gitworks/repos/logs",
+  "autotest.repos.commit_status_post_url": "http://gitworks/repos/statuses/%s.json",
+  "autotest.cached_repo_set_dir_name": "/home/httpd/apps/gitrepos",
+  "autotest.web.port": 8121,
+  "autotest.web.api_key": "devel/autotest/api_key.txt"
 }
