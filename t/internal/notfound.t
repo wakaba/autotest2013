@@ -11,6 +11,7 @@ use AutoTest::Action::InsertJob;
 use AutoTest::Runner;
 use Dongry::Database;
 use Test::AnyEvent::MySQL::CreateDatabase;
+use Test::AnyEvent::plackup;
 
 Test::AutoTest::GWServer->start_server_as_cv->recv;
 my $server_host = Test::AutoTest::GWServer->server_host;
@@ -45,6 +46,7 @@ test {
         'autotest.repos.log_post_url' => '',
         'autotest.repos.commit_status_post_url' => '',
         'autotest.cached_repo_set_dir_name' => $cached_d->absolute->stringify,
+        'autotest.web.port' => Test::AnyEvent::plackup::FindPort->find_listenable_port,
     });
     my $runner = AutoTest::Runner->new_from_config_and_dsns($config, get_dsns $c);
     $runner->process_as_cv->cb(sub {

@@ -102,10 +102,11 @@ sub interval {
 }
 
 sub web_port {
-    if (@_ > 1) {
-        $_[0]->{web_port} = $_[1];
-    }
-    return $_[0]->{web_port} || 9121;
+    return $_[0]->{web_port} ||= $_[0]->{config}->get_text('autotest.web.port');
+}
+
+sub web_api_key {
+    return $_[0]->{web_api_key} ||= $_[0]->{config}->get_file_base64_text('autotest.web.api_key');
 }
 
 sub log {
@@ -184,6 +185,7 @@ sub process_http {
     if ($path->[0] eq 'jobs' and not defined $path->[1]) {
         # /jobs
         $app->requires_request_method({POST => 1});
+        $app->requires_basic_auth({api_key => $self->web_api_key});
 
         my $json = $app->request_json;
 

@@ -1,5 +1,6 @@
 AnyEvent
 Exporter::Lite
+MIME::Base64
 Path::Class
 Test::Differences
 Test::More
