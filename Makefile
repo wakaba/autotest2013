@@ -37,7 +37,7 @@ test-deps: deps
 	cd modules/rdb-utils && $(MAKE) deps
 
 test-main:
-	$(PROVE) t/action/*.t t/runner/*.t
+	$(PROVE) t/action/*.t t/runner/*.t t/internal/*.t
 
 PREPARE_DB_SET_PL = modules/rdb-utils/bin/prepare-db-set.pl
 DB_SET_JSON = local/mysql/dsns.json

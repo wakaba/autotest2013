@@ -4,9 +4,12 @@ use warnings;
 use Path::Class;
 use Dongry::Database;
 use AnyEvent;
+use AnyEvent::HTTPD;
 use AnyEvent::Git::Repository;
 use AutoTest::Action::RunTest;
 use AutoTest::Action::ProcessJob;
+use Wanage::HTTP;
+use Warabe::App;
 
 sub new_from_config_and_dsns {
     return bless {config => $_[1], dsns => $_[2]}, $_[0];
@@ -98,6 +101,18 @@ sub interval {
     return 10;
 }
 
+sub web_port {
+    if (@_ > 1) {
+        $_[0]->{web_port} = $_[1];
+    }
+    return $_[0]->{web_port} || 9121;
+}
+
+sub log {
+    my $self = shift;
+    warn sprintf "[%s] %d: %s\n", scalar gmtime, $$, $_[0];
+}
+
 sub process_as_cv {
     my $self = shift;
     
@@ -107,14 +122,28 @@ sub process_as_cv {
     my $schedule_sleep;
     my $sleeping = 1;
 
+    my $httpd = AnyEvent::HTTPD->new(port => $self->web_port);
+    $httpd->reg_cb(request => sub {
+        my ($httpd, $req) = @_;
+        my $http = Wanage::HTTP->new_from_anyeventhttpd_httpd_and_req($httpd, $req);
+        $self->log($http->client_ip_addr->as_text . ': ' . $http->request_method . ' ' . $http->url->stringify);
+        my $app = Warabe::App->new_from_http($http);
+        $http->send_response(onready => sub {
+            $app->execute (sub {
+                $self->process_http($app);
+            });
+        });
+        $httpd->stop_request;
+    });
+
     $schedule_test = sub {
         $sleeping = 0;
-        #warn "test...\n";
+        $self->log("Finding a test job...");
         $self->process_next_as_cv->cb($schedule_sleep);
     };
     $schedule_sleep = sub {
         $sleeping = 1;
-        #warn "sleep...\n";
+        $self->log("Sleep @{[$self->interval]}s");
         my $watcher; $watcher = AE::timer $self->interval, 0, sub {
             undef $watcher;
             $schedule_test->();
@@ -131,9 +160,11 @@ sub process_as_cv {
     };
     for my $sig (qw(TERM INT)) {
         my $signal; $signal = AE::signal $sig => sub {
+            $self->log("Signal: SIG$sig");
             if ($sleeping) {
                 $schedule_end->();
                 undef $signal;
+                undef $httpd;
             } else {
                 $schedule_test = $schedule_sleep = $schedule_end;
                 $sleeping = 1; # for second kill
@@ -144,6 +175,13 @@ sub process_as_cv {
     $schedule_test->();
 
     return $cv;
+}
+
+sub process_http {
+    my ($self, $app) = @_;
+    my $path = $app->path_segments;
+    
+    return $app->throw_error(404);
 }
 
 1;
