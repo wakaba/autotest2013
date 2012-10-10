@@ -1,2 +1,2 @@
 #!/bin/sh
-exec setuidgid @@USER@@ multilog @@LOGDIR@@/testd-@@INSTANCENAME@@
+exec setuidgid @@USER@@ multilog @@LOGDIR@@/@@INSTANCENAME@@-testd
