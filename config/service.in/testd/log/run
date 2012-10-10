@@ -1,2 +1,2 @@
 #!/bin/sh
-exec setuidgid @@USER@@ multilog @@LOGDIR@@/httpd-@@INSTANCENAME@@
+exec setuidgid @@USER@@ multilog @@LOGDIR@@/testd-@@INSTANCENAME@@
