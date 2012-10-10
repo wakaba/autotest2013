@@ -57,6 +57,20 @@ sub commit_status_post_url {
     return $_[0]->{commit_status_post_url} ||= $_[0]->{config}->get_text('autotest.repos.commit_status_post_url');
 }
 
+sub log_basic_auth {
+    return $_[0]->{log_basic_auth} ||= [
+        $_[0]->{config}->get_file_base64_text('autotest.repos.log_basic_auth.user'),
+        $_[0]->{config}->get_file_base64_text('autotest.repos.log_basic_auth.password'),
+    ];
+}
+
+sub commit_status_basic_auth {
+    return $_[0]->{commit_status_basic_auth} ||= [
+        $_[0]->{config}->get_file_base64_text('autotest.repos.commit_status_basic_auth.user'),
+        $_[0]->{config}->get_file_base64_text('autotest.repos.commit_status_basic_auth.password'),
+    ];
+}
+
 sub cached_repo_set_d {
     return $_[0]->{cached_repo_set_d} ||= do {
         my $d = dir($_[0]->{config}->get_text('autotest.cached_repo_set_dir_name'));
@@ -85,10 +99,13 @@ sub process_next_as_cv {
     );
     $repo->branch($job->{branch});
     $repo->revision($job->{sha});
+    $repo->onmessage(sub { $self->log($_[0]) });
     
     my $action = AutoTest::Action::RunTest->new_from_repository($repo);
     $action->log_post_url($self->log_post_url);
     $action->commit_status_post_url($self->commit_status_post_url);
+    $action->log_basic_auth($self->log_basic_auth);
+    $action->commit_status_basic_auth($self->commit_status_basic_auth);
     my $cv = AE::cv;
     $action->run_test_as_cv->cb(sub {
         $self->job_action->complete_job($job);

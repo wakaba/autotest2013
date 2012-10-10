@@ -14,6 +14,20 @@ sub repository {
     return $_[0]->{repository};
 }
 
+sub log_basic_auth {
+    if (@_ > 1) {
+        $_[0]->{log_basic_auth} = $_[1];
+    }
+    return $_[0]->{log_basic_auth};
+}
+
+sub commit_status_basic_auth {
+    if (@_ > 1) {
+        $_[0]->{commit_status_basic_auth} = $_[1];
+    }
+    return $_[0]->{commit_status_basic_auth};
+}
+
 sub run_test_as_cv {
     my $self = shift;
     my $cv = AE::cv;
@@ -76,6 +90,7 @@ sub add_log_as_cv {
     my $title = $args{failed} ? 'AutoTest2013 result - failed' : 'AutoTest2013 result - success';
     http_post
         url => $url,
+        basic_auth => $self->log_basic_auth,
         params => {
             repository_url => $repo->url,
             branch => $repo->branch,
@@ -106,6 +121,7 @@ sub add_commit_status_as_cv {
     $url =~ s/%s/$repo->revision/e;
     http_post
         url => $url,
+        basic_auth => $self->commit_status_basic_auth,
         params => {
             repository_url => $repo->url,
             branch => $repo->branch,
