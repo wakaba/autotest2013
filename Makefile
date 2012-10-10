@@ -1,7 +1,7 @@
 WGET = wget
 PERL = ./perl
 GIT = git
-PROVE = ./perl
+PROVE = ./prove
 
 all:
 
