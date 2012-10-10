@@ -204,13 +204,14 @@ sub process_http {
         require AutoTest::Action::InsertJob;
         my $action = AutoTest::Action::InsertJob->new_from_dbreg($self->dbreg);
         $action->create_table;
-        $action->insert(
+        my $count = $action->insert(
             url => $url,
             branch => $branch,
             sha => $rev,
         );
 
-        $app->http->send_response_body_as_text("done");
+        $self->log("A job inserted") if $count;
+        $app->http->send_response_body_as_text("done ($count)");
         $app->http->close_response_body;
         return $app->throw;
     }

@@ -43,7 +43,7 @@ sub insert {
         'select uuid_short() as uuid', {},
         source_name => 'master',
     )->first->{uuid};
-    $db->insert(
+    return $db->insert(
         'job',
         [{
             url => $args{url},
@@ -53,7 +53,7 @@ sub insert {
             process_started => 0,
         }],
         duplicate => 'ignore',
-    );
+    )->row_count;
 }
 
 1;
