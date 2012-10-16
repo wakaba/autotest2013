@@ -28,6 +28,13 @@ sub commit_status_basic_auth {
     return $_[0]->{commit_status_basic_auth};
 }
 
+sub timeout {
+    if (@_ > 1) {
+        $_[0]->{timeout} = $_[1];
+    }
+    return $_[0]->{timeout} || 60*60*1;
+}
+
 sub run_test_as_cv {
     my $self = shift;
     my $cv = AE::cv;
@@ -40,8 +47,9 @@ sub run_test_as_cv {
         my $start_time = time;
         my $prefix = file(__FILE__)->dir->parent->parent->parent->absolute;
         local $ENV{LANG} = 'C';
-        local $ENV{PATH} = join ':', grep {not /^\Q$prefix\E\// } split /:/, $ENV{PATH};
+        local $ENV{PATH} = $ENV{PMBP_ORIG_PATH} || join ':', grep {not /^\Q$prefix\E\// } split /:/, $ENV{PATH};
         local $ENV{PERL5LIB} = '';
+        my $pid;
         run_cmd(
             $command,
             '>' => sub {
@@ -50,12 +58,19 @@ sub run_test_as_cv {
                     $onmessage->($_[0]);
                 }
             },
+            '$$' => \$pid,
+            on_prepare => sub { setpgrp 0, 0 },
         )->cb(sub {
             my $return = $_[0]->recv;
-            my $failed = $return >> 8;
+            my $failed = $return;
             my $end_time = time;
-            $output .= sprintf "Exited with status %d (%.2fs)\n",
-                $return >> 8, $end_time - $start_time;
+            if ($return & 127) {
+                $output .= sprintf "Exited with signal %d (%.2fs)\n",
+                    $return & 127, $end_time - $start_time;
+            } else {
+                $output .= sprintf "Exited with status %d (%.2fs)\n",
+                    $return >> 8, $end_time - $start_time;
+            }
 
             $self->add_log_as_cv(failed => $failed, data => $output)->cb(sub {
                 my $log_info = $_[0]->recv;
@@ -64,6 +79,12 @@ sub run_test_as_cv {
                 });
             });
         });
+        my $timer; $timer = AE::timer $self->timeout, 0, sub {
+            kill -9, getpgrp $pid;
+            $output .= sprintf "\nTest killed by timeout (= %d s)!\n",
+                $self->timeout;
+            undef $timer;
+        };
     });
     return $cv;
 }
