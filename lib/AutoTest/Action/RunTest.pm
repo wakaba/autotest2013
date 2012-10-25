@@ -49,6 +49,8 @@ sub run_test_as_cv {
         local $ENV{LANG} = 'C';
         local $ENV{PATH} = $ENV{PMBP_ORIG_PATH} || join ':', grep {not /^\Q$prefix\E\// } split /:/, $ENV{PATH};
         local $ENV{PERL5LIB} = '';
+        local $ENV{PMBP_DUMP_BEFORE_DIE} = 1;
+        local $ENV{PMBP_PARALLEL_COUNT} = 4;
         my $pid;
         run_cmd(
             $command,
