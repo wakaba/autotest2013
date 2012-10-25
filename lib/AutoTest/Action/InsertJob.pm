@@ -26,11 +26,13 @@ sub create_table {
             url VARCHAR(511) NOT NULL,
             branch VARCHAR(511) NOT NULL,
             sha BINARY(40) NOT NULL,
+            timestamp DOUBLE NOT NULL DEFAULT 0,
             process_id BIGINT UNSIGNED NOT NULL,
             process_started BIGINT UNSIGNED NOT NULL,
             UNIQUE KEY (url, sha),
             KEY (process_id),
-            KEY (process_started)
+            KEY (process_started),
+            KEY (timestamp)
         ) DEFAULT CHARSET=BINARY;
     });
 }
@@ -49,6 +51,7 @@ sub insert {
             url => $args{url},
             branch => $args{branch},
             sha => $args{sha},
+            timestamp => time,
             process_id => 0,
             process_started => 0,
         }],
