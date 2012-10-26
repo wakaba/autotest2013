@@ -1,0 +1,78 @@
+autotest2013
+~~~~~~~~~~~~
+
+A testing daemon.
+
+* Requirement for the Git repository to test
+
+Running the "make test" command at the topmost directory of the
+repository must run the tests.  It must return status 0 if and only if
+the tests passed.
+
+* Queueing a test job
+
+Access to the HTTP port of the daemon with method POST, path "/path",
+appropriate basic authentication credentials, HTTP header
+"Content-Type: application/json", and following response body:
+
+  {
+    "repository": {"url": "{URL of the Git repository}"},
+    "ref": "refs/heads/{branch name of the commit}",
+    "after": "{SHA-1 hash of the commit}"
+  }
+
+The server responds with status code 200 iff succeeded.
+
+* How to get test results?
+
+Test results are posted to loggin server by Web APIs (whose URLs can
+be controlled by configuration files described below).  Two kinds of
+Web APIs are invoked by the test daemon once tests have been done:
+
+  - Commit status API (similar to GitHub's commit status API)
+  - Full log API
+
+These APIs are implemented by GitWorks
+<https://github.com/wakaba/gitworks>.
+
+* Setup
+
+At the topmost directory of the copy of the Git repository,
+
+  $ make deps
+  $ export MYSQL_DSNS_JSON=path/to/dsns.json
+  $ export KARASUMA_CONFIG_JSON=path/to/config.json
+  $ export KARASUMA_CONFIG_FILE_DIR_NAME=path/to/keys
+  $ ./perl bin/runner.pl
+
+... where path/to/dsns.json contains the dsn for the MySQL database,
+for example:
+
+  {
+    "dsns": {
+      "autotestjobs": "dbi:mysql:dbname=myautotestjobs;host=localhost;user=hoge;password=fuga"
+    }
+  }
+
+... and path/to/config.json is configuration file (see
+config/example.json).  The directory path/to/keys is expected to
+contain files referenced by path/to/config.json.  For more information
+on configuration, see also documentation of Karasuma::Config::JSON
+module (which is contained in a Git submodule of the repository).
+
+You have to setup a MySQL database with the name specified in the dsn.
+Tables are automatically created by the daemon.
+
+The test daemon does NOT run multiple test simultaneously.  If you'd
+like to run tests parallel, run multiple test daemon processes.
+
+* Author
+
+Wakaba <wakabatan@hatena.ne.jp>.
+
+* License
+
+Copyright 2012 Hatena <http://www.hatena.ne.jp/>.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
