@@ -48,7 +48,7 @@ test {
                         is scalar @$json, 1;
                         is $json->[0]->{sha}, $rev;
                         is $json->[0]->{title}, 'AutoTest2013 result - failed';
-                        like $json->[0]->{data}, qr{^cd \\/tmp\\/\S+ && make test 2>&1}m;
+                        like $json->[0]->{data}, qr{^\$ cd \\/tmp\\/\S+ && make test 2>&1}m;
                         like $json->[0]->{data}, qr{^Exited with status 2}m;
                         $cv->end;
                     } $c;
@@ -120,7 +120,7 @@ test {
                         is scalar @$json, 1;
                         is $json->[0]->{sha}, $rev;
                         is $json->[0]->{title}, 'AutoTest2013 result - success';
-                        like $json->[0]->{data}, qr{^cd \\/tmp\\/\S+ && make test 2>&1}m;
+                        like $json->[0]->{data}, qr{^\$ cd \\/tmp\\/\S+ && make test 2>&1}m;
                         like $json->[0]->{data}, qr{^Exited with status 0}m;
                         $cv->end;
                     } $c;
@@ -192,7 +192,7 @@ test {
                         is scalar @$json, 1;
                         is $json->[0]->{sha}, $rev;
                         is $json->[0]->{title}, 'AutoTest2013 result - failed';
-                        like $json->[0]->{data}, qr{^cd \\/tmp\\/\S+ && make test 2>&1}m;
+                        like $json->[0]->{data}, qr{^\$ cd \\/tmp\\/\S+ && make test 2>&1}m;
                         like $json->[0]->{data}, qr{^Exited with status 2}m;
                         $cv->end;
                     } $c;
@@ -265,7 +265,7 @@ test {
                         is scalar @$json, 1;
                         is $json->[0]->{sha}, $rev;
                         is $json->[0]->{title}, 'AutoTest2013 result - failed';
-                        like $json->[0]->{data}, qr{^cd \\/tmp\\/\S+ && make test 2>&1}m;
+                        like $json->[0]->{data}, qr{^\$ cd \\/tmp\\/\S+ && make test 2>&1}m;
                         like $json->[0]->{data}, qr{^Test killed by timeout}m;
                         like $json->[0]->{data}, qr{^Exited with signal 9}m;
                         $cv->end;

@@ -43,7 +43,10 @@ sub run_test_as_cv {
         my $d = $repo->temp_repo_d;
         my $onmessage = $repo->onmessage;
         my $command = "cd \Q$d\E && make test 2>&1";
-        my $output = $command . "\n";
+        my $output =
+            '$ hostname' . "\n" .
+            `hostname` . "\n" .
+            '$ ' . $command . "\n";
         my $start_time = time;
         my $prefix = file(__FILE__)->dir->parent->parent->parent->absolute;
         local $ENV{LANG} = 'C';
