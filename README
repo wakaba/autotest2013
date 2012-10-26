@@ -66,6 +66,14 @@ Tables are automatically created by the daemon.
 The test daemon does NOT run multiple test simultaneously.  If you'd
 like to run tests parallel, run multiple test daemon processes.
 
+* Development
+
+Latest version of the software is available at GitHub
+<https://github.com/wakaba/autotest2013>.
+
+Test results of the software can be examined at Travis CI:
+<https://travis-ci.org/wakaba/autotest2013>.
+
 * Author
 
 Wakaba <wakabatan@hatena.ne.jp>.
