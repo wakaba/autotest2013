@@ -32,7 +32,7 @@ sub timeout {
     if (@_ > 1) {
         $_[0]->{timeout} = $_[1];
     }
-    return $_[0]->{timeout} || 60*60*2;
+    return $_[0]->{timeout} || 60*60;
 }
 
 sub run_test_as_cv {
