@@ -25,7 +25,7 @@ $http_server->set_app_code(q{
                     data => $params->{data}->[0],
                     id => $i,
                 };
-                push @{$repos->{$params->{repository_url}->[0]}->{logs} ||= []}, $log;
+                unshift @{$repos->{$params->{repository_url}->[0]}->{logs} ||= []}, $log;
                 $http->set_status(201);
                 $http->set_response_header(Location => q</repos/logs/> . $i);
                 $http->send_response_body_as_text(perl2json_bytes $log);
@@ -47,7 +47,7 @@ $http_server->set_app_code(q{
                     state => $params->{state}->[0],
                     target_url => $params->{target_url}->[0],
                 };
-                push @{$repos->{$params->{repository_url}->[0]}->{commit_statuses} ||= []}, $status;
+                unshift @{$repos->{$params->{repository_url}->[0]}->{commit_statuses} ||= []}, $status;
                 $http->send_response_body_as_text(perl2json_bytes $status);
                 $http->close_response_body;
                 return $http->send_response;
