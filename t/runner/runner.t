@@ -154,7 +154,7 @@ test {
                     my (undef, $res) = @_;
                     test {
                         my $json = json_bytes2perl $res->content;
-                        is scalar @$json, 1;
+                        is scalar @$json, 2;
                         undef $timer2;
                         $cv->end;
                     } $c;

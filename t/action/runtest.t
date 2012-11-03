@@ -65,11 +65,18 @@ test {
                     my (undef, $res) = @_;
                     test {
                         my $json = json_bytes2perl $res->content;
-                        is scalar @$json, 1;
+                        is scalar @$json, 2;
+
                         is $json->[0]->{sha}, $rev;
                         like $json->[0]->{target_url}, qr{/repos/logs/\d+$};
                         is $json->[0]->{description}, 'AutoTest2013 result - failed';
                         is $json->[0]->{state}, 'failure';
+
+                        is $json->[1]->{sha}, $rev;
+                        is $json->[1]->{target_url}, undef;
+                        is $json->[1]->{description}, 'AutoTest2013 result - started';
+                        is $json->[1]->{state}, 'pending';
+
                         $cv->end;
                     } $c;
                 };
@@ -83,7 +90,7 @@ test {
             });
         } $c;
     });
-} n => 10, name => 'failed (no rule)';
+} n => 14, name => 'failed (no rule)';
 
 test {
     my $c = shift;
@@ -137,11 +144,18 @@ test {
                     my (undef, $res) = @_;
                     test {
                         my $json = json_bytes2perl $res->content;
-                        is scalar @$json, 1;
+                        is scalar @$json, 2;
+
                         is $json->[0]->{sha}, $rev;
                         like $json->[0]->{target_url}, qr{/repos/logs/\d+$};
                         is $json->[0]->{description}, 'AutoTest2013 result - success';
                         is $json->[0]->{state}, 'success';
+
+                        is $json->[1]->{sha}, $rev;
+                        is $json->[1]->{target_url}, undef;
+                        is $json->[1]->{description}, 'AutoTest2013 result - started';
+                        is $json->[1]->{state}, 'pending';
+
                         $cv->end;
                     } $c;
                 };
@@ -155,7 +169,7 @@ test {
             });
         } $c;
     });
-} n => 10, name => 'success';
+} n => 14, name => 'success';
 
 test {
     my $c = shift;
@@ -209,11 +223,18 @@ test {
                     my (undef, $res) = @_;
                     test {
                         my $json = json_bytes2perl $res->content;
-                        is scalar @$json, 1;
+                        is scalar @$json, 2;
+
                         is $json->[0]->{sha}, $rev;
                         like $json->[0]->{target_url}, qr{/repos/logs/\d+$};
                         is $json->[0]->{description}, 'AutoTest2013 result - failed';
                         is $json->[0]->{state}, 'failure';
+
+                        is $json->[1]->{sha}, $rev;
+                        is $json->[1]->{target_url}, undef;
+                        is $json->[1]->{description}, 'AutoTest2013 result - started';
+                        is $json->[1]->{state}, 'pending';
+
                         $cv->end;
                     } $c;
                 };
@@ -227,7 +248,7 @@ test {
             });
         } $c;
     });
-} n => 10, name => 'failed (make failed)';
+} n => 14, name => 'failed (make failed)';
 
 test {
     my $c = shift;
@@ -283,11 +304,18 @@ test {
                     my (undef, $res) = @_;
                     test {
                         my $json = json_bytes2perl $res->content;
-                        is scalar @$json, 1;
+                        is scalar @$json, 2;
+
                         is $json->[0]->{sha}, $rev;
                         like $json->[0]->{target_url}, qr{/repos/logs/\d+$};
                         is $json->[0]->{description}, 'AutoTest2013 result - failed';
                         is $json->[0]->{state}, 'failure';
+
+                        is $json->[1]->{sha}, $rev;
+                        is $json->[1]->{target_url}, undef;
+                        is $json->[1]->{description}, 'AutoTest2013 result - started';
+                        is $json->[1]->{state}, 'pending';
+                        
                         $cv->end;
                     } $c;
                 };
@@ -301,7 +329,7 @@ test {
             });
         } $c;
     });
-} n => 11, name => 'failed (timeout)';
+} n => 15, name => 'failed (timeout)';
 
 run_tests;
 Test::AutoTest::GWServer->stop_server_as_cv->recv;

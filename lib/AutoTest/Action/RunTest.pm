@@ -39,7 +39,15 @@ sub run_test_as_cv {
     my $self = shift;
     my $cv = AE::cv;
     my $repo = $self->repository;
-    $repo->clone_as_cv->cb(sub {
+
+    my $cv1 = AE::cv;
+    $cv1->begin;
+    $cv1->begin;
+    $self->add_commit_status_as_cv->cb(sub { $cv1->end });
+    $cv1->begin;
+    $repo->clone_as_cv->cb(sub { $cv1->end });
+    $cv1->end;
+    $cv1->cb(sub {
         my $d = $repo->temp_repo_d;
         my $onmessage = $repo->onmessage;
         my $command = "cd \Q$d\E && make test 2>&1";
@@ -79,7 +87,7 @@ sub run_test_as_cv {
 
             $self->add_log_as_cv(failed => $failed, data => $output)->cb(sub {
                 my $log_info = $_[0]->recv;
-                $self->add_commit_status_as_cv(failed => $failed, log_url => $log_info->{log_url})->cb(sub {
+                $self->add_commit_status_as_cv(done => 1, failed => $failed, log_url => $log_info->{log_url})->cb(sub {
                     $cv->send;
                 });
             });
@@ -142,8 +150,8 @@ sub add_commit_status_as_cv {
     my $cv = AE::cv;
     my $url = $self->commit_status_post_url;
     my $repo = $self->repository;
-    my $state = $args{failed} ? 'failure' : 'success';
-    my $title = $args{failed} ? 'AutoTest2013 result - failed' : 'AutoTest2013 result - success';
+    my $state = $args{done} ? $args{failed} ? 'failure' : 'success' : 'pending';
+    my $title = $args{done} ? $args{failed} ? 'AutoTest2013 result - failed' : 'AutoTest2013 result - success' : 'AutoTest2013 result - started';
     $url =~ s/%s/$repo->revision/e;
     http_post
         url => $url,
