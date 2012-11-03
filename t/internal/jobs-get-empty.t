@@ -70,34 +70,23 @@ test {
     my $timer; $timer = AE::timer 1, 0, sub {
         test {
             my $port = $runner->web_port;
-            http_post_data
-                url => qq<http://localhost:$port/jobs>,
+            http_get
+                url => qq<http://localhost:$port/jobs.json>,
                 basic_auth => [api_key => $api_key],
-                header_fields => {'Content-Type' => 'application/json'},
-                content => perl2json_bytes +{
-                    repository => {url => $temp_d->stringify},
-                    ref => 'refs/heads/master',
-                    after => $rev,
-                },
                 anyevent => 1,
                 cb => sub {
                     my ($req, $res) = @_;
                     test {
                         is $res->code, 200;
-
-                        my $timer2; $timer2 = AE::timer 15, 0, sub {
-                            test {
-                                ok -f $temp_d->file('foo.txt');
-                                undef $timer2;
-                                kill 'TERM', $$;
-                            } $c;
-                        };
+                        my $json = json_bytes2perl $res->content;
+                        is ref $json, 'ARRAY';
+                        kill 'TERM', $$;
                     } $c;
                 };
             undef $timer;
         } $c;
     };
-} name => 'post done', n => 2, wait => $mysqld_cv;
+} name => 'items', n => 2, wait => $mysqld_cv;
 
 run_tests;
 Test::AutoTest::GWServer->stop_server_as_cv->recv;

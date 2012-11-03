@@ -72,7 +72,7 @@ test {
             my $port = $runner->web_port;
             http_post_data
                 url => qq<http://localhost:$port/jobs>,
-                basic_auth => [api_key => $api_key],
+                #basic_auth => [api_key => $api_key],
                 header_fields => {'Content-Type' => 'application/json'},
                 content => perl2json_bytes +{
                     repository => {url => $temp_d->stringify},
@@ -83,11 +83,11 @@ test {
                 cb => sub {
                     my ($req, $res) = @_;
                     test {
-                        is $res->code, 200;
+                        is $res->code, 401;
 
                         my $timer2; $timer2 = AE::timer 15, 0, sub {
                             test {
-                                ok -f $temp_d->file('foo.txt');
+                                ok !-f $temp_d->file('foo.txt');
                                 undef $timer2;
                                 kill 'TERM', $$;
                             } $c;
@@ -97,7 +97,7 @@ test {
             undef $timer;
         } $c;
     };
-} name => 'post done', n => 2, wait => $mysqld_cv;
+} name => 'post no auth', n => 2, wait => $mysqld_cv;
 
 run_tests;
 Test::AutoTest::GWServer->stop_server_as_cv->recv;

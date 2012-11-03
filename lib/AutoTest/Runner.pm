@@ -231,6 +231,12 @@ sub process_http {
         $app->http->send_response_body_as_text("done ($count)");
         $app->http->close_response_body;
         return $app->throw;
+    } elsif ($path->[0] eq 'jobs.json' and not defined $path->[1]) {
+        $app->requires_basic_auth({api_key => $self->web_api_key});
+        require AutoTest::Loader::PendingJobs;
+        my $loader = AutoTest::Loader::PendingJobs->new_from_dbreg($self->dbreg);
+        $app->send_json($loader->get_items);
+        return $app->throw;
     }
     
     return $app->throw_error(404);
