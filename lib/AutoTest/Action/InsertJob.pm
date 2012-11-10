@@ -55,7 +55,10 @@ sub insert {
             process_id => 0,
             process_started => 0,
         }],
-        duplicate => 'ignore',
+        duplicate => {
+            process_id => 0,
+            process_started => 0,
+        },
     )->row_count;
 }
 
