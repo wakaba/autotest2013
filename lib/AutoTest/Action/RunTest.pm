@@ -4,6 +4,7 @@ use warnings;
 use Path::Class;
 use AnyEvent;
 use AnyEvent::Util;
+use File::Temp;
 use Web::UserAgent::Functions qw(http_post);
 
 sub new_from_repository {
@@ -62,6 +63,8 @@ sub run_test_as_cv {
         local $ENV{PERL5LIB} = '';
         local $ENV{PMBP_DUMP_BEFORE_DIE} = 1;
         local $ENV{PMBP_PARALLEL_COUNT} = 4;
+        my $tempdir = File::Temp->newdir('AUTOTEST-XX'.'XX'.'XX'.'XX', TMPDIR => 1, CLEANUP => 1);
+        local $ENV{TMPDIR} = $tempdir->dirname;
         my $pid;
         run_cmd(
             $command,
@@ -84,6 +87,7 @@ sub run_test_as_cv {
                 $output .= sprintf "Exited with status %d (%.2fs)\n",
                     $return >> 8, $end_time - $start_time;
             }
+            undef $tempdir;
 
             $self->add_log_as_cv(failed => $failed, data => $output)->cb(sub {
                 my $log_info = $_[0]->recv;

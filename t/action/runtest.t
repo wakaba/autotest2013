@@ -331,5 +331,35 @@ test {
     });
 } n => 15, name => 'failed (timeout)';
 
+test {
+    my $c = shift;
+
+    my $temp_d = dir(tempdir(CLEANUP => 1));
+    system "cd $temp_d && git init && echo 'test:\n\techo \"aaaaaaa\" > \$(TMPDIR)/aaa.txt\n\tperl -MFile::Temp=tempfile -e\"print File::Temp->new->filename\" > $temp_d/foo.txt\n\tperl -e \"print qq{\\\$\$ENV{TMPDIR}}\" > $temp_d/bar.txt' > Makefile && git add Makefile && git commit -m New";
+    my $rev = `cd $temp_d && git rev-parse HEAD`;
+    chomp $rev;
+
+    my $cached_d = dir(tempdir(CLEANUP => 1));
+    my $repo = AnyEvent::Git::Repository->new_from_url_and_cached_repo_set_d($temp_d, $cached_d);
+    $repo->branch('master');
+    $repo->revision($rev);
+    $repo->onmessage(sub { warn $_[0] });
+    
+    my $action = AutoTest::Action::RunTest->new_from_repository($repo);
+    $action->log_post_url("http://$server_host/repos/logs");
+    $action->commit_status_post_url("http://$server_host/repos/statuses/%s.json");
+    $action->run_test_as_cv->cb(sub {
+        test {
+            my $tempdir = $temp_d->file('bar.txt')->slurp;
+            like $tempdir, qr{/AUTOTEST-};
+            my $temp_file_name = $temp_d->file('foo.txt')->slurp;
+            like $temp_file_name, qr{/AUTOTEST-};
+            ok !-d $tempdir;
+            done $c;
+            undef $c;
+        } $c;
+    });
+} n => 3, name => 'success - tempdir';
+
 run_tests;
 Test::AutoTest::GWServer->stop_server_as_cv->recv;
